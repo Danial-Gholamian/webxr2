@@ -10,6 +10,8 @@
   } from './vrSetup.js';
   import { createPendulum, updatePendulums, highlightPendulum } from './pendulum.js';
   import { movement } from './controls.js';
+  import { detectHover } from './vrSetup.js';
+
 
   document.body.appendChild(VRButton.createButton(renderer));
   renderer.xr.enabled = true;
@@ -38,6 +40,9 @@
     updateLaserPointer(controller2);
     highlightPendulum(controller1);
     highlightPendulum(controller2);
+    detectHover(controller1);
+    detectHover(controller2);
+
 
     updatePendulums(0.016);
     updateCameraMovement();

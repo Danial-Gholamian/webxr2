@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import { scene, camera, renderer } from './sceneSetup.js';
 import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory.js';
 import { grabPendulum, releasePendulum } from './pendulum.js';
+import { pendulums } from './pendulum.js';
 
 
 
@@ -32,6 +33,51 @@ let grabbedController = null;
 
 const raycaster = new THREE.Raycaster();
 const tempMatrix = new THREE.Matrix4();
+
+let lastHovered = new WeakMap();
+
+function detectHover(controller) {
+  const rayOrigin = new THREE.Vector3();
+  const rayDirection = new THREE.Vector3();
+
+  controller.getWorldPosition(rayOrigin);
+  controller.getWorldDirection(rayDirection).normalize().multiplyScalar(5); // mimic your working "grabbing" logic
+
+  raycaster.set(rayOrigin, rayDirection);
+
+  const meshTargets = pendulums.flatMap(p => [p.arm, p.bob]);
+  const intersects = raycaster.intersectObjects(meshTargets, true);
+
+  if (intersects.length > 0) {
+    const hit = intersects[0].object;
+    const pendulum = pendulums.find(p => p.arm === hit || p.bob === hit);
+
+    if (pendulum && lastHovered.get(controller) !== pendulum) {
+      // Reset previous
+      if (lastHovered.get(controller)) {
+        lastHovered.get(controller).bob.material = lastHovered.get(controller).bob.userData.defaultMaterial;
+      }
+
+      // Highlight
+      pendulum.bob.material = new THREE.MeshStandardMaterial({ color: 0xff4444 });
+      lastHovered.set(controller, pendulum);
+
+      // Haptic feedback
+      const session = renderer.xr.getSession();
+      const inputSource = session?.inputSources.find(src => src.targetRaySpace === controller);
+      if (inputSource?.gamepad?.hapticActuators?.[0]) {
+        inputSource.gamepad.hapticActuators[0].pulse(1.0, 50);
+      }
+    }
+  } else {
+    // No hit → clear previous
+    const last = lastHovered.get(controller);
+    if (last) {
+      last.bob.material = last.bob.userData.defaultMaterial;
+      lastHovered.delete(controller);
+    }
+  }
+}
 
 
 // function getIntersection(controller) {
@@ -188,4 +234,4 @@ handleTriggerClick(controller1);
 handleTriggerClick(controller2);
 // UNTIL HERE 
 
-export { handleJoystickInput, updateLaserPointer, controller1, controller2, cameraGroup};
+export { handleJoystickInput, updateLaserPointer, controller1, controller2, cameraGroup, detectHover};
