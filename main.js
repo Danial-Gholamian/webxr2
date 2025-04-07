@@ -7,7 +7,6 @@ import {
   updateLaserPointer,
   controller1,
   controller2,
-  updatePendulumPosition
 } from './vrSetup.js';
 import { createPendulum, updatePendulums } from './pendulum.js';
 import { movement } from './controls.js';
@@ -39,6 +38,6 @@ renderer.setAnimationLoop((time, xrFrame) => {
   updateLaserPointer(controller2);
   updatePendulums(0.016);
   updateCameraMovement();
-  updatePendulumPosition();
+  // updatePendulumPosition();
   renderer.render(scene, camera);
 });

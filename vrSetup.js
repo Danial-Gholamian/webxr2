@@ -34,45 +34,6 @@ const raycaster = new THREE.Raycaster();
 const tempMatrix = new THREE.Matrix4();
 
 
-function getIntersection(controller) {
-    tempMatrix.identity().extractRotation(controller.matrixWorld);
-    raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
-    raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
-    
-    raycaster.far = 10;  
-
-    return raycaster.intersectObjects(scene.children, true);
-}
-
-
-function onSelectStart(event) {
-    const controller = event.target;
-    const intersections = getIntersection(controller);
-  
-    if (intersections.length > 0) {
-      grabbedObject = intersections[0].object;
-      grabbedController = controller;
-    }
-  }
-  
-
-  function onSelectEnd(event) {
-    grabbedObject = null;
-    grabbedController = null;
-  }
-  
-
-  function updatePendulumPosition() {
-    if (grabbedObject && grabbedController) {
-      // Get world position of controller
-      const controllerPos = new THREE.Vector3();
-      grabbedController.getWorldPosition(controllerPos);
-  
-      // Optionally smooth motion
-      grabbedObject.position.lerp(controllerPos, 0.5);
-    }
-  }
-  
 
 
 function setupController(controller) {
@@ -94,8 +55,8 @@ controller.userData.laser = laser;
 
 cameraGroup.add(controller);
 
-controller.addEventListener('selectstart', onSelectStart);
-controller.addEventListener('selectend', onSelectEnd);
+// controller.addEventListener('selectstart', onSelectStart);
+// controller.addEventListener('selectend', onSelectEnd);
 }
   
 
@@ -188,4 +149,4 @@ handleTriggerClick(controller1);
 handleTriggerClick(controller2);
 // UNTIL HERE 
 
-export { handleJoystickInput, updateLaserPointer, controller1, controller2, cameraGroup, updatePendulumPosition };
+export { handleJoystickInput, updateLaserPointer, controller1, controller2, cameraGroup};
