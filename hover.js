@@ -78,4 +78,3 @@ export function detectHover(controller, group) {
     controller.userData.lastHovered = null;
   }
 }
-
