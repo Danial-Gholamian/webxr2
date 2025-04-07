@@ -140,4 +140,4 @@ handleTriggerClick(controller1);
 handleTriggerClick(controller2);
 // UNTIL HERE 
 
-export { handleJoystickInput, updateLaserPointer, controller1, controller2, cameraGroup, detectHover};
+export { handleJoystickInput, updateLaserPointer, controller1, controller2, cameraGroup};
