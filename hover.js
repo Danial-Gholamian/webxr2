@@ -4,13 +4,13 @@ const intersected = [];
 const raycaster = new THREE.Raycaster();
 const tempMatrix = new THREE.Matrix4();
 
-export function setupInteractiveGroup(pendulums) {
+function setupInteractiveGroup(pendulums) {
   const group = new THREE.Group();
   pendulums.forEach(p => group.add(p.bob)); // or p.arm
   return group;
 }
 
-export function detectHover(controller, group) {
+function detectHover(controller, group) {
   if (controller.userData.selected) return;
 
   while (intersected.length) {
@@ -35,3 +35,4 @@ export function detectHover(controller, group) {
     if (line) line.scale.z = 10;
   }
 }
+export {setupInteractiveGroup, detectHover};
