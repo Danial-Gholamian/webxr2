@@ -78,3 +78,8 @@ export function detectHover(controller, group) {
     controller.userData.lastHovered = null;
   }
 }
+const inputSource = controller.userData.inputSource;
+if (inputSource?.gamepad?.hapticActuators?.[0]) {
+  inputSource.gamepad.hapticActuators[0].pulse(1.0, 50);
+}
+

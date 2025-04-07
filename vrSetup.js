@@ -135,8 +135,18 @@ function handleTriggerClick(controller) {
     });
   }
 
+
 controller1.userData.handedness = "left";
 controller2.userData.handedness = "right";
+
+renderer.xr.addEventListener("sessionstart", () => {
+  const session = renderer.xr.getSession();
+  session.inputSources.forEach((source) => {
+    const hand = source.handedness;
+    if (hand === "left") controller1.userData.inputSource = source;
+    if (hand === "right") controller2.userData.inputSource = source;
+  });
+});
 
 
 handleTriggerClick(controller1);

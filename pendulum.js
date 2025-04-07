@@ -21,7 +21,13 @@ function createPendulum(position) {
   const arm = new THREE.Mesh(armGeometry, armMaterial);
 
   const bobGeometry = new THREE.SphereGeometry(0.3, 32, 32);
-  const bobMaterial = new THREE.MeshMatcapMaterial({ matcap: matcapTexture });
+  // const bobMaterial = new THREE.MeshMatcapMaterial({ matcap: matcapTexture });
+  const bobMaterial = new THREE.MeshStandardMaterial({
+    color: 0x3333ff,
+    emissive: 0x000000,
+    metalness: 0.2,
+    roughness: 0.5,
+  });
   const bob = new THREE.Mesh(bobGeometry, bobMaterial);
 
   bob.userData.defaultMaterial = bobMaterial;
