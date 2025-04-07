@@ -8,17 +8,6 @@ import { grabPendulum, releasePendulum } from './pendulum.js';
 
 
 
-
-controller1.addEventListener('selectstart', () => grabPendulum(controller1));
-controller1.addEventListener('selectend', releasePendulum);
-controller2.addEventListener('selectstart', () => grabPendulum(controller2));
-controller2.addEventListener('selectend', releasePendulum);
-
-
-
-
-
-
 let cameraGroup = new THREE.Group();
 cameraGroup.add(camera);
 scene.add(cameraGroup);
@@ -28,6 +17,12 @@ const controller2 = renderer.xr.getController(1);
 cameraGroup.add(controller1);
 cameraGroup.add(controller2);
 
+
+
+controller1.addEventListener('selectstart', () => grabPendulum(controller1));
+controller1.addEventListener('selectend', releasePendulum);
+controller2.addEventListener('selectstart', () => grabPendulum(controller2));
+controller2.addEventListener('selectend', releasePendulum);
 
 
 
