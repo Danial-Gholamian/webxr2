@@ -41,43 +41,55 @@ function detectHover(controller) {
   const rayDirection = new THREE.Vector3();
 
   controller.getWorldPosition(rayOrigin);
-  controller.getWorldDirection(rayDirection).normalize().multiplyScalar(5); // mimic your working "grabbing" logic
+  controller.getWorldDirection(rayDirection).normalize().multiplyScalar(5);
+
+  console.log(`[Hover] Controller origin:`, rayOrigin);
+  console.log(`[Hover] Controller direction:`, rayDirection);
 
   raycaster.set(rayOrigin, rayDirection);
 
   const meshTargets = pendulums.flatMap(p => [p.arm, p.bob]);
   const intersects = raycaster.intersectObjects(meshTargets, true);
 
+  console.log(`[Hover] Intersect count: ${intersects.length}`);
+
   if (intersects.length > 0) {
     const hit = intersects[0].object;
     const pendulum = pendulums.find(p => p.arm === hit || p.bob === hit);
 
+    console.log(`[Hover] Hit object:`, hit.name || hit.type);
+    console.log(`[Hover] Matched pendulum:`, !!pendulum);
+
     if (pendulum && lastHovered.get(controller) !== pendulum) {
-      // Reset previous
       if (lastHovered.get(controller)) {
+        console.log(`[Hover] Resetting previous highlight`);
         lastHovered.get(controller).bob.material = lastHovered.get(controller).bob.userData.defaultMaterial;
       }
 
-      // Highlight
+      console.log(`[Hover] Highlighting new pendulum`);
       pendulum.bob.material = new THREE.MeshStandardMaterial({ color: 0xff4444 });
       lastHovered.set(controller, pendulum);
 
-      // Haptic feedback
       const session = renderer.xr.getSession();
       const inputSource = session?.inputSources.find(src => src.targetRaySpace === controller);
       if (inputSource?.gamepad?.hapticActuators?.[0]) {
+        console.log(`[Hover] Triggering haptics`);
         inputSource.gamepad.hapticActuators[0].pulse(1.0, 50);
+      } else {
+        console.log(`[Hover] No haptics available`);
       }
     }
   } else {
-    // No hit → clear previous
+    console.log(`[Hover] No pendulum hit`);
     const last = lastHovered.get(controller);
     if (last) {
+      console.log(`[Hover] Clearing highlight`);
       last.bob.material = last.bob.userData.defaultMaterial;
       lastHovered.delete(controller);
     }
   }
 }
+
 
 
 // function getIntersection(controller) {
@@ -177,8 +189,8 @@ function moveThumbstick(inputX, inputY, speed = movementSpeed) {
         let moveX = right.multiplyScalar(inputX * speed);
         let moveZ = direction.multiplyScalar(-inputY * speed);
         cameraGroup.position.add(moveX).add(moveZ);
-        console.log("Move x: ", moveX);
-        console.log("Move z: ", moveZ);
+        // console.log("Move x: ", moveX);
+        // console.log("Move z: ", moveZ);
     }
 }
 
