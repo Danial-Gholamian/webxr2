@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { scene, camera, renderer } from './sceneSetup.js';
 import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory.js';
 import { grabPendulum, releasePendulum } from './pendulum.js';
-import { pendulums } from './pendulum.js';
+
 
 
 
