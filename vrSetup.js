@@ -134,7 +134,10 @@ function handleTriggerClick(controller) {
       }
     });
   }
-  
+
+controller1.userData.handedness = "left";
+controller2.userData.handedness = "right";
+
 
 handleTriggerClick(controller1);
 handleTriggerClick(controller2);

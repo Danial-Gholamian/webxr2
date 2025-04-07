@@ -16,13 +16,16 @@ export function setupInteractiveGroup(pendulums) {
 export function detectHover(controller, group) {
   if (controller.userData.selected) return;
 
+  // Identify controller handedness
+  const handedness = controller.userData.handedness || "unknown";
+
   // Clear previous highlights
   while (intersected.length) {
     const obj = intersected.pop();
     if (obj.material?.emissive) {
       obj.material.emissive.setRGB(0, 0, 0);
     }
-    console.log(`[Hover] Cleared emissive from`, obj.name || obj.type);
+    console.log(`[Hover:${handedness}] Cleared emissive from`, obj.name || obj.type);
   }
 
   // Set up ray from controller
@@ -36,28 +39,30 @@ export function detectHover(controller, group) {
 
   if (intersections.length > 0) {
     const hit = intersections[0].object;
-    console.log(`[Hover] Hit object:`, hit.name || hit.type);
+    const hitName = hit.name || hit.type;
+    console.log(`[Hover:${handedness}] Hit object: ${hitName}`);
 
-    const pendulum = pendulums.find(p =>
+    const pendulumIndex = pendulums.findIndex(p =>
       p.arm === hit || p.bob === hit || p.pivot === hit.parent || p.pivot === hit
     );
+    const pendulum = pendulums[pendulumIndex];
 
     if (pendulum && pendulum.bob.material?.emissive) {
       pendulum.bob.material.emissive.setRGB(1, 0, 0); // red
       intersected.push(pendulum.bob);
 
-      console.log(`[Hover] Highlighting pendulum bob at:`, pendulum.pivot.position);
+      console.log(`[Hover:${handedness}] Highlighting bob of pendulum #${pendulumIndex} at`, pendulum.pivot.position);
 
       if (!controller.userData.lastHovered || controller.userData.lastHovered !== pendulum) {
         controller.userData.lastHovered = pendulum;
-        console.log(`[Hover] New hover — triggering haptics`);
+        console.log(`[Hover:${handedness}] New hover — triggering haptics`);
 
         const session = renderer.xr.getSession();
         const inputSource = session?.inputSources.find(src => src.targetRaySpace === controller);
         if (inputSource?.gamepad?.hapticActuators?.[0]) {
           inputSource.gamepad.hapticActuators[0].pulse(1.0, 50);
         } else {
-          console.log(`[Hover] Haptics not available`);
+          console.log(`[Hover:${handedness}] Haptics not available`);
         }
       }
     }
@@ -67,7 +72,7 @@ export function detectHover(controller, group) {
     if (line) line.scale.z = 10;
 
     if (controller.userData.lastHovered) {
-      console.log(`[Hover] No intersection — clearing lastHovered`);
+      console.log(`[Hover:${handedness}] No intersection — clearing lastHovered`);
     }
 
     controller.userData.lastHovered = null;
