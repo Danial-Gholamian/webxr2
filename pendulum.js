@@ -23,6 +23,8 @@ function createPendulum(position) {
   const bobMaterial = new THREE.MeshMatcapMaterial({ matcap: matcapTexture });
   const bob = new THREE.Mesh(bobGeometry, bobMaterial);
 
+  bob.userData.defaultMaterial = bobMaterial;
+
   arm.position.y = -length / 2;
   bob.position.y = -length;
 
@@ -39,6 +41,7 @@ function createPendulum(position) {
 
   return pivot;
 }
+
 
 // Raycasting for controller selection
 const raycaster = new THREE.Raycaster();
@@ -69,6 +72,45 @@ function grabPendulum(controller) {
     console.log("No pendulum detected.");
   }
 }
+
+let lastHighlighted = null;
+
+export function highlightPendulum(controller) {
+  const rayOrigin = new THREE.Vector3();
+  const rayDirection = new THREE.Vector3();
+  controller.getWorldPosition(rayOrigin);
+  controller.getWorldDirection(rayDirection).normalize();
+
+  raycaster.set(rayOrigin, rayDirection);
+  const intersects = raycaster.intersectObjects(pendulums.map(p => p.pivot), true);
+
+  if (intersects.length > 0) {
+    const hit = intersects[0].object.parent;
+    const pendulum = pendulums.find(p => p.pivot === hit);
+
+    if (pendulum && pendulum !== lastHighlighted) {
+      if (lastHighlighted) {
+        lastHighlighted.bob.material = lastHighlighted.bob.userData.defaultMaterial;
+      }
+
+      pendulum.bob.material = new THREE.MeshStandardMaterial({ color: 0xff4444 });
+      lastHighlighted = pendulum;
+
+      const session = renderer.xr.getSession();
+      const inputSource = session?.inputSources.find(src => src.targetRaySpace === controller);
+      if (inputSource?.gamepad?.hapticActuators?.[0]) {
+        inputSource.gamepad.hapticActuators[0].pulse(1.0, 50); // Short pulse
+      }
+    }
+  } else {
+    if (lastHighlighted) {
+      lastHighlighted.bob.material = lastHighlighted.bob.userData.defaultMaterial;
+      lastHighlighted = null;
+    }
+  }
+}
+
+
 
 function releasePendulum() {
   if (grabbedPendulum) {
