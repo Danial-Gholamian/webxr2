@@ -76,7 +76,7 @@ function grabPendulum(controller) {
 
 let lastHighlighted = null;
 
-export function highlightPendulum(controller) {
+function highlightPendulum(controller) {
   const rayOrigin = new THREE.Vector3();
   const rayDirection = new THREE.Vector3();
   controller.getWorldPosition(rayOrigin);
