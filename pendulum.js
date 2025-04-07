@@ -1,6 +1,7 @@
 // pendulum.js
 import * as THREE from 'three';
 import { scene } from './sceneSetup.js';
+import { renderer } from './sceneSetup.js';
 
 const length = 2;
 const gravity = 9.81;
@@ -138,4 +139,4 @@ function updatePendulums(deltaTime) {
   });
 }
 
-export { createPendulum, updatePendulums, grabPendulum, releasePendulum };
+export { createPendulum, updatePendulums, grabPendulum, releasePendulum, highlightPendulum };
