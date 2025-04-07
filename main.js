@@ -8,9 +8,10 @@
     controller1,
     controller2,
   } from './vrSetup.js';
-  import { createPendulum, updatePendulums, highlightPendulum } from './pendulum.js';
+  import { createPendulum, updatePendulums} from './pendulum.js';
   import { movement } from './controls.js';
-  import { detectHover } from './vrSetup.js';
+  import { detectHover, setupInteractiveGroup } from './hover.js';
+  import { pendulums } from './pendulum.js';
 
 
   document.body.appendChild(VRButton.createButton(renderer));
@@ -31,6 +32,7 @@
     rightVector.crossVectors(camera.up, forwardVector);
     camera.position.addScaledVector(rightVector, movement.right * 0.1);
   }
+  const interactiveGroup = setupInteractiveGroup(pendulums);
 
   // Main animation loop
   renderer.setAnimationLoop((time, xrFrame) => {
@@ -38,11 +40,8 @@
 
     updateLaserPointer(controller1);
     updateLaserPointer(controller2);
-    highlightPendulum(controller1);
-    highlightPendulum(controller2);
-    detectHover(controller1);
-    detectHover(controller2);
-
+    detectHover(controller1, interactiveGroup);
+    detectHover(controller2, interactiveGroup);
 
     updatePendulums(0.016);
     updateCameraMovement();

@@ -74,55 +74,6 @@ function grabPendulum(controller) {
   }
 }
 
-let lastHighlighted = null;
-
-function highlightPendulum(controller) {
-  scene.updateMatrixWorld(true); 
-
-  const rayOrigin = new THREE.Vector3();
-  const rayDirection = new THREE.Vector3();
-  controller.getWorldPosition(rayOrigin);
-  controller.getWorldDirection(rayDirection).normalize();
-
-  raycaster.set(rayOrigin, rayDirection);
-  const intersects = raycaster.intersectObjects(pendulums.map(p => p.pivot), true);
-
-  if (intersects.length > 0) {
-    let hit = intersects[0].object;
-
-    while (hit && !pendulums.find(p => p.pivot === hit)) {
-      hit = hit.parent;
-    }
-
-    const pendulum = pendulums.find(p => p.pivot === hit);
-
-    if (pendulum && pendulum !== lastHighlighted) {
-      if (lastHighlighted) {
-        lastHighlighted.bob.material = lastHighlighted.bob.userData.defaultMaterial;
-      }
-
-      pendulum.bob.material = new THREE.MeshStandardMaterial({ color: 0xff4444 });
-      lastHighlighted = pendulum;
-
-      const session = renderer.xr.getSession();
-      const inputSource = session?.inputSources.find(src => src.targetRaySpace === controller);
-
-      if (inputSource?.gamepad?.hapticActuators?.[0]) {
-        inputSource.gamepad.hapticActuators[0].pulse(1.0, 50); // vibrate
-      } else {
-        console.log(" Haptics not supported.");
-      }
-    }
-  } else {
-    if (lastHighlighted) {
-      lastHighlighted.bob.material = lastHighlighted.bob.userData.defaultMaterial;
-      lastHighlighted = null;
-    }
-  }
-}
-
-
-
 
 function releasePendulum() {
   if (grabbedPendulum) {
@@ -150,4 +101,4 @@ function updatePendulums(deltaTime) {
   });
 }
 
-export { createPendulum, updatePendulums, grabPendulum, releasePendulum, highlightPendulum };
+export { createPendulum, updatePendulums, grabPendulum, releasePendulum};
