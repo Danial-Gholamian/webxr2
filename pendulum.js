@@ -77,6 +77,8 @@ function grabPendulum(controller) {
 let lastHighlighted = null;
 
 function highlightPendulum(controller) {
+  scene.updateMatrixWorld(true); 
+
   const rayOrigin = new THREE.Vector3();
   const rayDirection = new THREE.Vector3();
   controller.getWorldPosition(rayOrigin);
@@ -86,7 +88,12 @@ function highlightPendulum(controller) {
   const intersects = raycaster.intersectObjects(pendulums.map(p => p.pivot), true);
 
   if (intersects.length > 0) {
-    const hit = intersects[0].object.parent;
+    let hit = intersects[0].object;
+
+    while (hit && !pendulums.find(p => p.pivot === hit)) {
+      hit = hit.parent;
+    }
+
     const pendulum = pendulums.find(p => p.pivot === hit);
 
     if (pendulum && pendulum !== lastHighlighted) {
@@ -99,8 +106,11 @@ function highlightPendulum(controller) {
 
       const session = renderer.xr.getSession();
       const inputSource = session?.inputSources.find(src => src.targetRaySpace === controller);
+
       if (inputSource?.gamepad?.hapticActuators?.[0]) {
-        inputSource.gamepad.hapticActuators[0].pulse(1.0, 50); // Short pulse
+        inputSource.gamepad.hapticActuators[0].pulse(1.0, 50); // vibrate
+      } else {
+        console.log(" Haptics not supported.");
       }
     }
   } else {
@@ -110,6 +120,7 @@ function highlightPendulum(controller) {
     }
   }
 }
+
 
 
 
