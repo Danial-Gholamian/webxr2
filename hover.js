@@ -1,6 +1,7 @@
 // hover.js
 import * as THREE from 'three';
 import { pendulums } from './pendulum.js';
+import { renderer } from './sceneSetup.js';
 
 const intersected = [];
 const raycaster = new THREE.Raycaster();
@@ -19,7 +20,7 @@ export function detectHover(controller, group) {
   while (intersected.length) {
     const obj = intersected.pop();
     if (obj.material?.emissive) {
-      obj.material.emissive.r = 0;
+      obj.material.emissive.setRGB(0, 0, 0); // reset emissive to default
     }
   }
 
@@ -31,8 +32,8 @@ export function detectHover(controller, group) {
 
   // Intersect with pendulum pivots and children
   const intersections = raycaster.intersectObjects(group.children, true);
-
   const line = controller.userData.laser;
+
   if (intersections.length > 0) {
     const hit = intersections[0].object;
 
@@ -42,12 +43,28 @@ export function detectHover(controller, group) {
     );
 
     if (pendulum && pendulum.bob.material?.emissive) {
-      pendulum.bob.material.emissive.r = 1;
+      // Set color while hovering
+      pendulum.bob.material.emissive.setRGB(1, 0, 0); // red highlight
       intersected.push(pendulum.bob);
+
+      // One-time haptic on first hover hit
+      if (!controller.userData.lastHovered || controller.userData.lastHovered !== pendulum) {
+        controller.userData.lastHovered = pendulum;
+
+        const session = renderer.xr.getSession();
+        const inputSource = session?.inputSources.find(src => src.targetRaySpace === controller);
+
+        if (inputSource?.gamepad?.hapticActuators?.[0]) {
+          inputSource.gamepad.hapticActuators[0].pulse(1.0, 50); // short buzz
+        }
+      }
     }
 
     if (line) line.scale.z = intersections[0].distance;
   } else {
     if (line) line.scale.z = 10;
+
+    // Reset for next hit
+    controller.userData.lastHovered = null;
   }
 }
