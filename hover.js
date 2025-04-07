@@ -1,38 +1,53 @@
+// hover.js
 import * as THREE from 'three';
+import { pendulums } from './pendulum.js';
 
 const intersected = [];
 const raycaster = new THREE.Raycaster();
 const tempMatrix = new THREE.Matrix4();
 
-function setupInteractiveGroup(pendulums) {
+export function setupInteractiveGroup(pendulums) {
   const group = new THREE.Group();
-  pendulums.forEach(p => group.add(p.bob)); // or p.arm
+  pendulums.forEach(p => group.add(p.pivot)); // ✅ Keep hierarchy intact
   return group;
 }
 
-function detectHover(controller, group) {
+export function detectHover(controller, group) {
   if (controller.userData.selected) return;
 
+  // Clear previous highlights
   while (intersected.length) {
     const obj = intersected.pop();
-    if (obj.material?.emissive) obj.material.emissive.r = 0;
+    if (obj.material?.emissive) {
+      obj.material.emissive.r = 0;
+    }
   }
 
+  // Set up ray from controller
   tempMatrix.identity().extractRotation(controller.matrixWorld);
   raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
   raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
   raycaster.far = 10;
 
+  // Intersect with pendulum pivots and children
   const intersections = raycaster.intersectObjects(group.children, true);
 
   const line = controller.userData.laser;
   if (intersections.length > 0) {
-    const object = intersections[0].object;
-    if (object.material?.emissive) object.material.emissive.r = 1;
-    intersected.push(object);
+    const hit = intersections[0].object;
+
+    // Find the matching pendulum
+    const pendulum = pendulums.find(p =>
+      p.arm === hit || p.bob === hit || p.pivot === hit.parent || p.pivot === hit
+    );
+
+    if (pendulum && pendulum.bob.material?.emissive) {
+      pendulum.bob.material.emissive.r = 1;
+      intersected.push(pendulum.bob);
+    }
+
     if (line) line.scale.z = intersections[0].distance;
   } else {
     if (line) line.scale.z = 10;
   }
 }
-export {setupInteractiveGroup, detectHover};
