@@ -94,7 +94,7 @@ function updatePendulums(deltaTime) {
   pendulums.forEach((p, index) => {
     if (p === grabbedPendulum && grabbedController) {
       const newPos = new THREE.Vector3();
-      grabbedController.getWorldPosition(newPos);
+      grabbedController.getWorldPosition(newPos)  ;
       p.pivot.position.lerp(newPos, 0.8);
       return;
     }
@@ -107,4 +107,14 @@ function updatePendulums(deltaTime) {
   });
 }
 
-export { createPendulum, updatePendulums, grabPendulum, releasePendulum};
+function updateGrabbedPendulum() {
+  if (grabbedPendulum && grabbedController) {
+    const controllerPos = new THREE.Vector3();
+    grabbedController.getWorldPosition(controllerPos);
+
+    grabbedPendulum.pivot.position.copy(controllerPos);
+  }
+}
+
+
+export { createPendulum, updatePendulums, grabPendulum, releasePendulum, updateGrabbedPendulum};

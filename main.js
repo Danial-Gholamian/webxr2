@@ -8,7 +8,7 @@ import {
   controller1,
   controller2,
 } from './vrSetup.js';
-import { createPendulum, updatePendulums } from './pendulum.js';
+import { createPendulum, updatePendulums, updateGrabbedPendulum } from './pendulum.js';
 import { movement } from './controls.js';
 import { detectHover, setupInteractiveGroup } from './hover.js';
 import { pendulums } from './pendulum.js';
@@ -49,5 +49,6 @@ renderer.setAnimationLoop((time, xrFrame) => {
 
   updatePendulums(0.016);
   updateCameraMovement();
+  updateGrabbedPendulum();
   renderer.render(scene, camera);
 });

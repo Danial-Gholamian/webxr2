@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { renderer } from './sceneSetup.js';
+// import { renderer } from './sceneSetup.js';
 
 const intersected = [];
 const raycaster = new THREE.Raycaster();
