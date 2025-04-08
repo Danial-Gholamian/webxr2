@@ -36,11 +36,12 @@ export function detectHover(controller, group) {
 
   const intersections = raycaster.intersectObjects(group.children, true);
   const line = controller.userData.laser;
-
+  console.log(`[Hover:${handedness}] Intersections:`, intersections);
   if (intersections.length > 0) {
     const hit = intersections[0].object;
     const hitName = hit.name || hit.type;
-    // console.log(`[Hover:${handedness}] Hit object: ${hitName}`);
+    console.log(`[Hover:${handedness}] Hit object: ${hitName}`);
+    console.log(`[Hover:${handedness}] Hit object name/type: ${hitName}`);
 
     const pendulumIndex = pendulums.findIndex(p =>
       p.arm === hit || p.bob === hit || p.pivot === hit.parent || p.pivot === hit
