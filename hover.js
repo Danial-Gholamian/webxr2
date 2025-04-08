@@ -40,7 +40,7 @@ export function detectHover(controller, group) {
     const hit = intersections[0].object;
     console.log(`[Hover:${handedness}] Hit object:`, hit);
 
-    if (hit instanceof THREE.Mesh) {
+    if (hit instanceof Mesh) {
       console.log(`[Hover:${handedness}] Mesh detected — trying haptics`);
 
       const inputSource = controller.userData.inputSource;
