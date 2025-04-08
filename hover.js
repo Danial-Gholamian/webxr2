@@ -58,13 +58,36 @@ export function detectHover(controller, group) {
         console.log(`[Hover:${handedness}] New hover — triggering haptics`);
       
         const inputSource = controller.userData.inputSource;
-        const actuator = inputSource?.gamepad?.hapticActuators?.[0];
-      
-        if (actuator?.pulse) {
-          actuator.pulse(1.0, 50);
-        } else {
-          console.log(`[Hover:${handedness}] Haptics not available or unsupported`);
+
+        if (!inputSource) {
+          console.warn(`[Hover:${handedness}] 🚫 No inputSource on controller.userData`);
+          return;
         }
+        
+        console.log(`[Hover:${handedness}] ✅ inputSource`, inputSource);
+        
+        const gamepad = inputSource.gamepad;
+        if (!gamepad) {
+          console.warn(`[Hover:${handedness}] 🚫 inputSource has no gamepad`);
+          return;
+        }
+        
+        console.log(`[Hover:${handedness}] 🎮 Gamepad detected`, gamepad);
+        console.log(`[Hover:${handedness}] 🔧 hapticActuators`, gamepad.hapticActuators);
+        
+        const actuator = gamepad.hapticActuators?.[0];
+        if (!actuator) {
+          console.warn(`[Hover:${handedness}] 🚫 No haptic actuator found`);
+          return;
+        }
+        
+        if (typeof actuator.pulse === "function") {
+          console.log(`[Hover:${handedness}] ✅ actuator.pulse exists — sending pulse!`);
+          actuator.pulse(1.0, 100);
+        } else {
+          console.warn(`[Hover:${handedness}] ❌ actuator.pulse is not a function`);
+        }
+        
       }      
       
     }

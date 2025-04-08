@@ -141,12 +141,19 @@ controller2.userData.handedness = "right";
 
 renderer.xr.addEventListener("sessionstart", () => {
   const session = renderer.xr.getSession();
+  console.log("📦 XR InputSources on session start:", session.inputSources);
+
   session.inputSources.forEach((source) => {
+    console.log(`🎮 Source handedness: ${source.handedness}`);
+    console.log("🔌 Gamepad object:", source.gamepad);
+    console.log("💥 Haptic actuators:", source.gamepad?.hapticActuators);
+
     const hand = source.handedness;
     if (hand === "left") controller1.userData.inputSource = source;
     if (hand === "right") controller2.userData.inputSource = source;
   });
 });
+
 
 
 handleTriggerClick(controller1);
