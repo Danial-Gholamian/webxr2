@@ -43,23 +43,33 @@ export function detectHover(controller, group) {
     console.log(`[Hover:${handedness}] Hit object: ${hitName}`);
     console.log(`[Hover:${handedness}] Hit object name/type: ${hitName}`);
 
-    const pendulumIndex = pendulums.findIndex(p =>
-      p.arm === hit || p.bob === hit || p.pivot === hit.parent || p.pivot === hit
-    );
-    const pendulum = pendulums[pendulumIndex];
+    const pendulum = pendulums.find(p => {
+      return (
+        hit === p.bob ||                     // direct match
+        hit === p.arm ||
+        hit === p.pivot ||
+        hit.parent === p.bob ||             // one level up
+        hit.parent === p.arm ||
+        hit.parent === p.pivot ||
+        p.pivot.children.includes(hit) ||   // children array match
+        p.arm.children?.includes(hit) ||
+        p.bob.children?.includes(hit)
+      );
+    });
+    
 
     if (pendulum && pendulum.bob.material?.emissive) {
       pendulum.bob.material.emissive.setRGB(1, 0, 0); // red
       intersected.push(pendulum.bob);
-
-      console.log(`[Hover:${handedness}] Highlighting bob of pendulum #${pendulumIndex} at`, pendulum.pivot.position);
-
+    
+      console.log(`[Hover:${handedness}] Highlighting pendulum at`, pendulum.pivot.position);
+    
       if (!controller.userData.lastHovered || controller.userData.lastHovered !== pendulum) {
         controller.userData.lastHovered = pendulum;
         console.log(`[Hover:${handedness}] New hover — triggering haptics`);
-      
+        
+        // ... haptics code ...    
         const inputSource = controller.userData.inputSource;
-
         if (!inputSource) {
           console.warn(`[Hover:${handedness}] 🚫 No inputSource on controller.userData`);
           return;
