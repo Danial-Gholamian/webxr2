@@ -56,15 +56,17 @@ export function detectHover(controller, group) {
       if (!controller.userData.lastHovered || controller.userData.lastHovered !== pendulum) {
         controller.userData.lastHovered = pendulum;
         console.log(`[Hover:${handedness}] New hover — triggering haptics`);
-
-        const session = renderer.xr.getSession();
-        const inputSource = session?.inputSources.find(src => src.targetRaySpace === controller);
-        if (inputSource?.gamepad?.hapticActuators?.[0]) {
-          inputSource.gamepad.hapticActuators[0].pulse(1.0, 50);
+      
+        const inputSource = controller.userData.inputSource;
+        const actuator = inputSource?.gamepad?.hapticActuators?.[0];
+      
+        if (actuator?.pulse) {
+          actuator.pulse(1.0, 50);
         } else {
-          console.log(`[Hover:${handedness}] Haptics not available`);
+          console.log(`[Hover:${handedness}] Haptics not available or unsupported`);
         }
-      }
+      }      
+      
     }
 
     if (line) line.scale.z = intersections[0].distance;
