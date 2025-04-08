@@ -43,8 +43,9 @@ renderer.setAnimationLoop((time, xrFrame) => {
 
   updateLaserPointer(controller1);
   updateLaserPointer(controller2);
-  detectHover(controller1, interactiveGroup);
-  detectHover(controller2, interactiveGroup);
+  if (controller1.userData.inputSource) detectHover(controller1, interactiveGroup);
+  if (controller2.userData.inputSource) detectHover(controller2, interactiveGroup);
+  
 
   updatePendulums(0.016);
   updateCameraMovement();
