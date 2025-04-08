@@ -34,13 +34,13 @@ export function detectHover(controller, group) {
   const intersections = raycaster.intersectObjects(group.children, true);
   const line = controller.userData.laser;
 
-  console.log(`[Hover:${handedness}] Intersections:`, intersections);
+  // console.log(`[Hover:${handedness}] Intersections:`, intersections);
 
   if (intersections.length > 0) {
     const hit = intersections[0].object;
     console.log(`[Hover:${handedness}] Hit object:`, hit);
 
-    if (hit instanceof Mesh) {
+    if (hit instanceof THREE.Mesh) {
       console.log(`[Hover:${handedness}] Mesh detected — trying haptics`);
 
       const inputSource = controller.userData.inputSource;
@@ -67,6 +67,8 @@ export function detectHover(controller, group) {
       } else {
         console.warn(`[Hover:${handedness}] ❌ pulse not supported`);
       }
+    } else {
+      console.log("I'm not instamnce of THREE.Mesh !")
     }
 
     if (line) line.scale.z = intersections[0].distance;
