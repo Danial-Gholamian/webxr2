@@ -7,13 +7,15 @@ import {
   updateLaserPointer,
   controller1,
   controller2,
-  updateGrab
+  grabbedObject,
+  grabbingController,
+  tryGrabObject,
+  releaseObject
 } from './vrSetup.js';
-
 import { createPendulum, updatePendulums} from './pendulum.js';
 import { movement } from './controls.js';
-// import { detectHover, setupInteractiveGroup } from './hover.js';
-
+import { detectHover, setupInteractiveGroup } from './hover.js';
+import { pendulums } from './pendulum.js';
 
 // Add VR button and enable WebXR
 document.body.appendChild(VRButton.createButton(renderer));
@@ -25,10 +27,12 @@ for (let i = 0; i < 5; i++) {
 }
 
 // Now that pendulums are created, create the interactive group
-// const interactiveGroup = setupInteractiveGroup(pendulums);
-// scene.add(interactiveGroup);
-
-
+const interactiveGroup = setupInteractiveGroup(pendulums);
+scene.add(interactiveGroup);
+controller1.addEventListener('selectstart', () => tryGrabObject(controller1, interactiveGroup));
+controller1.addEventListener('selectend', () => releaseObject());
+controller2.addEventListener('selectstart', () => tryGrabObject(controller2, interactiveGroup));
+controller2.addEventListener('selectend', () => releaseObject());
 
 // Keyboard movement handler
 function updateCameraMovement() {
@@ -47,14 +51,21 @@ renderer.setAnimationLoop((time, xrFrame) => {
 
   updateLaserPointer(controller1);
   updateLaserPointer(controller2);
-  // if (controller1.userData.inputSource) detectHover(controller1, interactiveGroup);
-  // if (controller2.userData.inputSource) detectHover(controller2, interactiveGroup);
+  if (controller1.userData.inputSource) detectHover(controller1, interactiveGroup);
+  if (controller2.userData.inputSource) detectHover(controller2, interactiveGroup);
   
 
   updatePendulums(0.016);
   updateCameraMovement();
   // updateGrabbedPendulum();
-  updateGrab();
 
+  if (grabbedObject && grabbingController) {
+    console.log("🧲 Moving grabbed object:", grabbedObject.name || grabbedObject.uuid);
+    const controllerPos = new THREE.Vector3();
+    grabbingController.getWorldPosition(controllerPos);
+    console.log("🎮 Controller position:", controllerPos);
+    grabbedObject.position.lerp(controllerPos, 0.3); // smooth follow
+
+  }  
   renderer.render(scene, camera);
 });
