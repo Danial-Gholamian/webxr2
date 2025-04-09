@@ -11,50 +11,58 @@ const matcapTexture = new THREE.TextureLoader().load(
 
 export const pendulums = [];
 
-export class Pendulum {
-  constructor(position) {
-    this.angle = Math.PI / 4;
-    this.velocity = 0;
-    this.acceleration = 0;
-
-    const armGeometry = new THREE.CylinderGeometry(0.02, 0.02, length, 32);
-    const armMaterial = new THREE.MeshMatcapMaterial({ matcap: matcapTexture });
-    this.arm = new THREE.Mesh(armGeometry, armMaterial);
-    this.arm.position.y = -length / 2;
-    this.arm.userData.grabbable = true;
-    this.arm.userData.type = 'pendulum';
-
-    const bobGeometry = new THREE.SphereGeometry(0.3, 32, 32);
-    const bobMaterial = new THREE.MeshMatcapMaterial({ matcap: matcapTexture });
-    this.bob = new THREE.Mesh(bobGeometry, bobMaterial);
-    this.bob.position.y = -length;
-    this.bob.userData.grabbable = true;
-    this.bob.userData.type = 'pendulum';
-
-    this.pivot = new THREE.Object3D();
-    this.pivot.position.copy(position);
-    this.pivot.add(this.arm);
-    this.pivot.add(this.bob);
-    this.pivot.userData.type = 'pendulum';
-
-    scene.add(this.pivot);
-  }
-
-  update(deltaTime) {
-    this.acceleration = (-gravity / length) * Math.sin(this.angle);
-    this.velocity += this.acceleration * deltaTime;
-    this.velocity *= damping;
-    this.angle += this.velocity * deltaTime;
-    this.pivot.rotation.z = this.angle;
-  }
-}
-
 export function createPendulum(position) {
-  const p = new Pendulum(position);
-  pendulums.push(p);
-  return p;
+  const angle = Math.PI / 4;
+  const velocity = 0;
+  const acceleration = 0;
+
+  // Arm
+  const armGeometry = new THREE.CylinderGeometry(0.02, 0.02, length, 32);
+  const armMaterial = new THREE.MeshMatcapMaterial({ matcap: matcapTexture });
+  const arm = new THREE.Mesh(armGeometry, armMaterial);
+  arm.position.y = -length / 2;
+  arm.userData.grabbable = true;
+  arm.userData.type = 'pendulum';
+
+  // Bob
+  const bobGeometry = new THREE.SphereGeometry(0.3, 32, 32);
+  const bobMaterial = new THREE.MeshMatcapMaterial({ matcap: matcapTexture });
+  const bob = new THREE.Mesh(bobGeometry, bobMaterial);
+  bob.position.y = -length;
+  bob.userData.grabbable = true;
+  bob.userData.type = 'pendulum';
+
+  // Pivot
+  const pivot = new THREE.Object3D();
+  pivot.position.copy(position);
+  pivot.add(arm);
+  pivot.add(bob);
+  pivot.userData.type = 'pendulum';
+  pivot.userData.isBeingHeld = false;
+
+  scene.add(pivot);
+
+  const pendulum = {
+    pivot,
+    arm,
+    bob,
+    angle,
+    velocity,
+    acceleration
+  };
+
+  pendulums.push(pendulum);
+  return pendulum;
 }
 
 export function updatePendulums(deltaTime) {
-  pendulums.forEach(p => p.update(deltaTime));
+  pendulums.forEach(p => {
+    if (p.pivot.userData.isBeingHeld) return;
+
+    p.acceleration = (-gravity / length) * Math.sin(p.angle);
+    p.velocity += p.acceleration * deltaTime;
+    p.velocity *= damping;
+    p.angle += p.velocity * deltaTime;
+    p.pivot.rotation.z = p.angle;
+  });
 }

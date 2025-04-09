@@ -4,6 +4,7 @@ import * as THREE from 'three';
 
 import { scene, camera, renderer } from './sceneSetup.js';
 import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory.js';
+import {pendulums} from './pendulum.js'
 // import { grabPendulum, releasePendulum } from './pendulum.js';
 
 
@@ -72,29 +73,27 @@ function tryGrabObject(controller, group) {
   controller.getWorldDirection(direction).normalize().multiplyScalar(5);
 
   raycaster.set(origin, direction);
+
   const intersects = raycaster
     .intersectObjects(group.children, true)
-    .filter(i => !i.object.userData.isLaser);
+    .filter(i => !i.object.userData.isLaser && !i.object.name?.includes('button'));
 
   console.log("📡 Raycast intersections:", intersects);
 
   if (intersects.length > 0) {
     const hit = intersects[0].object;
-    const type = hit.userData.type || "unknown";
+    const match = pendulums.find(p => hit === p.pivot || hit.parent === p.pivot || hit.parent?.parent === p.pivot);
 
-    console.log(`🎯 Ray hit object of type: ${type}`, hit);
-
-    if (hit instanceof THREE.Mesh && hit.userData.grabbable && type === "pendulum") {
-      const pivot = hit.parent;
-      if (pivot && pivot.userData.type === "pendulum") {
-        grabbedObject = pivot;
-        grabbingController = controller;
-        grabbedObject.userData.isBeingHeld = true;
-        console.log("✅ Grabbed pendulum pivot:", grabbedObject.name || grabbedObject.uuid);
-      }
+    if (match) {
+      grabbedObject = match.pivot;
+      grabbingController = controller;
+      match.pivot.userData.isBeingHeld = true;
+      console.log("✅ Grabbed pendulum pivot:", grabbedObject);
     } else {
-      console.log(`🚫 Cannot grab: type=${type}, grabbable=${!!hit.userData.grabbable}`);
+      console.warn("❓ Hit something that's not mapped in pendulums:", hit.name || hit.uuid);
     }
+  } else {
+    console.log("🚫 No pendulum hit.");
   }
 }
 
@@ -102,11 +101,11 @@ function tryGrabObject(controller, group) {
 function releaseObject() {
   if (grabbedObject) {
     grabbedObject.userData.isBeingHeld = false;
-    console.log("🛑 Released object:", grabbedObject.name || grabbedObject.uuid);
     grabbedObject = null;
     grabbingController = null;
   }
 }
+
 
 
 

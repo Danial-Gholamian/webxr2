@@ -30,9 +30,10 @@ for (let i = 0; i < 5; i++) {
 const interactiveGroup = setupInteractiveGroup(pendulums);
 scene.add(interactiveGroup);
 controller1.addEventListener('selectstart', () => tryGrabObject(controller1, interactiveGroup));
-controller1.addEventListener('selectend', () => releaseObject());
+controller1.addEventListener('selectend', releaseObject);
 controller2.addEventListener('selectstart', () => tryGrabObject(controller2, interactiveGroup));
-controller2.addEventListener('selectend', () => releaseObject());
+controller2.addEventListener('selectend', releaseObject);
+
 
 // Keyboard movement handler
 function updateCameraMovement() {
@@ -60,11 +61,9 @@ renderer.setAnimationLoop((time, xrFrame) => {
   // updateGrabbedPendulum();
 
   if (grabbedObject && grabbingController) {
-    console.log("🧲 Moving grabbed object:", grabbedObject.name || grabbedObject.uuid);
     const controllerPos = new THREE.Vector3();
     grabbingController.getWorldPosition(controllerPos);
-    console.log("🎮 Controller position:", controllerPos);
-    grabbedObject.position.lerp(controllerPos, 0.3); // smooth follow
+    grabbedObject.position.lerp(controllerPos, 0.4); // smooth movement
   }  
   renderer.render(scene, camera);
 });
