@@ -14,7 +14,7 @@ import {
 
 import { createPendulum, updatePendulums} from './pendulum.js';
 import { movement } from './controls.js';
-import { detectHover, setupInteractiveGroup } from './hover.js';
+// import { detectHover, setupInteractiveGroup } from './hover.js';
 import { pendulums } from './pendulum.js';
 
 // Add VR button and enable WebXR
@@ -27,8 +27,8 @@ for (let i = 0; i < 5; i++) {
 }
 
 // Now that pendulums are created, create the interactive group
-const interactiveGroup = setupInteractiveGroup(pendulums);
-scene.add(interactiveGroup);
+// const interactiveGroup = setupInteractiveGroup(pendulums);
+// scene.add(interactiveGroup);
 
 
 
@@ -49,8 +49,8 @@ renderer.setAnimationLoop((time, xrFrame) => {
 
   updateLaserPointer(controller1);
   updateLaserPointer(controller2);
-  if (controller1.userData.inputSource) detectHover(controller1, interactiveGroup);
-  if (controller2.userData.inputSource) detectHover(controller2, interactiveGroup);
+  // if (controller1.userData.inputSource) detectHover(controller1, interactiveGroup);
+  // if (controller2.userData.inputSource) detectHover(controller2, interactiveGroup);
   
 
   updatePendulums(0.016);
