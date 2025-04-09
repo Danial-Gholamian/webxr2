@@ -7,15 +7,13 @@ import {
   updateLaserPointer,
   controller1,
   controller2,
-  grabbedObject,
-  grabbingController,
   updateGrab
 } from './vrSetup.js';
 
 import { createPendulum, updatePendulums} from './pendulum.js';
 import { movement } from './controls.js';
 // import { detectHover, setupInteractiveGroup } from './hover.js';
-import { pendulums } from './pendulum.js';
+
 
 // Add VR button and enable WebXR
 document.body.appendChild(VRButton.createButton(renderer));
