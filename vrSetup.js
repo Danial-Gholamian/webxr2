@@ -58,8 +58,6 @@ controller.userData.laser = laser;
 cameraGroup.add(controller);
 
 }
-  
-
 
 
 setupController(controller1);
@@ -68,6 +66,8 @@ setupController(controller2);
 
 
 function tryGrabObject(controller) {
+  console.log("🎯 selectstart fired for controller", controller.userData.handedness);
+
   const origin = new THREE.Vector3();
   const direction = new THREE.Vector3();
   controller.getWorldPosition(origin);
@@ -75,9 +75,13 @@ function tryGrabObject(controller) {
 
   raycaster.set(origin, direction);
   const intersects = raycaster.intersectObjects(scene.children, true);
+  console.log("📡 Raycast intersections:", intersects);
 
   if (intersects.length > 0) {
     const hit = intersects[0].object;
+    console.log("🎯 Ray hit object:", hit);
+    console.log("📦 Object type:", hit.type, "| isMesh:", hit.isMesh, "| instanceof Mesh:", hit instanceof THREE.Mesh);
+
     if (hit instanceof THREE.Mesh) {
       grabbedObject = hit;
       grabbingController = controller;
@@ -85,6 +89,7 @@ function tryGrabObject(controller) {
     }
   }
 }
+
 
 function releaseObject() {
   if (grabbedObject) {

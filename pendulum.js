@@ -102,34 +102,16 @@ function createPendulum(position) {
 //   }
 // }
 
-// function updatePendulums(deltaTime) {
-//   pendulums.forEach((p, index) => {
-//     if (p === grabbedPendulum && grabbedController) {
-//       const controllerPos = new THREE.Vector3();
-//       grabbedController.getWorldPosition(controllerPos);
-    
-//       // Get the pivot position (fixed point)
-//       const pivotPos = p.pivot.position.clone();
-    
-//       // Calculate the angle in the XZ-plane
-//       const offset = controllerPos.clone().sub(pivotPos);
-//       const angle = Math.atan2(offset.x, offset.z); // swing left/right
-    
-//       p.angle = angle;
-//       p.velocity = 0; // optional: reset velocity while grabbing
-    
-//       // Visual update
-//       p.pivot.rotation.z = p.angle;
-//       return;
-//     }    
+function updatePendulums(deltaTime) {
+  pendulums.forEach((p, index) => {
 
-//     p.acceleration = (-gravity / length) * Math.sin(p.angle);
-//     p.velocity += p.acceleration * deltaTime;
-//     p.velocity *= damping;
-//     p.angle += p.velocity * deltaTime;
-//     p.pivot.rotation.z = p.angle;
-//   });
-// }
+    p.acceleration = (-gravity / length) * Math.sin(p.angle);
+    p.velocity += p.acceleration * deltaTime;
+    p.velocity *= damping;
+    p.angle += p.velocity * deltaTime;
+    p.pivot.rotation.z = p.angle;
+  });
+}
 
 // function updateGrabbedPendulum() {
 //   if (grabbedPendulum && grabbedController) {
@@ -141,4 +123,4 @@ function createPendulum(position) {
 // }
 
 // updatePendulums, grabPendulum, releasePendulum, updateGrabbedPendulum
-export { createPendulum};
+export { createPendulum, updatePendulums};

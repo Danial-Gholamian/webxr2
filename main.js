@@ -10,7 +10,7 @@ import {
   grabbedObject,
   grabbingController 
 } from './vrSetup.js';
-import { createPendulum} from './pendulum.js';
+import { createPendulum, updatePendulums} from './pendulum.js';
 import { movement } from './controls.js';
 import { detectHover, setupInteractiveGroup } from './hover.js';
 import { pendulums } from './pendulum.js';
@@ -49,14 +49,16 @@ renderer.setAnimationLoop((time, xrFrame) => {
   if (controller2.userData.inputSource) detectHover(controller2, interactiveGroup);
   
 
-  // updatePendulums(0.016);
+  updatePendulums(0.016);
   updateCameraMovement();
   // updateGrabbedPendulum();
 
   if (grabbedObject && grabbingController) {
+    console.log("🧲 Moving grabbed object:", grabbedObject.name || grabbedObject.uuid);
     const controllerPos = new THREE.Vector3();
     grabbingController.getWorldPosition(controllerPos);
+    console.log("🎮 Controller position:", controllerPos);
     grabbedObject.position.copy(controllerPos);
-  }
+  }  
   renderer.render(scene, camera);
 });

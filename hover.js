@@ -38,34 +38,34 @@ export function detectHover(controller, group) {
 
   if (intersections.length > 0) {
     const hit = intersections[0].object;
-    console.log(`[Hover:${handedness}] Hit object:`, hit);
+    // console.log(`[Hover:${handedness}] Hit object:`, hit);
 
     if (hit instanceof THREE.Mesh) {
-      console.log(`[Hover:${handedness}] Mesh detected — trying haptics`);
+      // console.log(`[Hover:${handedness}] Mesh detected — trying haptics`);
 
       const inputSource = controller.userData.inputSource;
       if (!inputSource) {
-        console.warn(`[Hover:${handedness}] 🚫 No inputSource`);
+        // console.warn(`[Hover:${handedness}] 🚫 No inputSource`);
         return;
       }
 
       const gamepad = inputSource.gamepad;
       if (!gamepad) {
-        console.warn(`[Hover:${handedness}] 🚫 No gamepad`);
+        // console.warn(`[Hover:${handedness}] 🚫 No gamepad`);
         return;
       }
 
       const actuator = gamepad.hapticActuators?.[0];
       if (!actuator) {
-        console.warn(`[Hover:${handedness}] 🚫 No haptic actuator`);
+        // console.warn(`[Hover:${handedness}] 🚫 No haptic actuator`);
         return;
       }
 
       if (typeof actuator.pulse === "function") {
-        console.log(`[Hover:${handedness}] ✅ actuator.pulse() triggered!`);
+        // console.log(`[Hover:${handedness}] ✅ actuator.pulse() triggered!`);
         actuator.pulse(1.0, 100);
       } else {
-        console.warn(`[Hover:${handedness}] ❌ pulse not supported`);
+        // console.warn(`[Hover:${handedness}] ❌ pulse not supported`);
       }
     } else {
       console.log("I'm not instamnce of THREE.Mesh !")
