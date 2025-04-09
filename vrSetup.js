@@ -76,8 +76,8 @@ function tryGrabObject(controller) {
 
   raycaster.set(origin, direction);
   const intersects = raycaster
-  .intersectObjects(scene.children, true)
-  .filter(i => !i.object.userData.isLaser); // filter out laser
+    .intersectObjects(scene.children, true)
+    .filter(i => !i.object.userData.isLaser); // filter out laser lines
 
   console.log("📡 Raycast intersections:", intersects);
 
@@ -86,10 +86,13 @@ function tryGrabObject(controller) {
     console.log("🎯 Ray hit object:", hit);
     console.log("📦 Object type:", hit.type, "| isMesh:", hit.isMesh, "| instanceof Mesh:", hit instanceof THREE.Mesh);
 
-    if (hit instanceof THREE.Mesh) {
+    // ✅ Only grab if it's a mesh and explicitly marked as grabbable
+    if (hit instanceof THREE.Mesh && hit.userData.grabbable) {
       grabbedObject = hit;
       grabbingController = controller;
-      console.log("✅ Grabbed object:", hit);
+      console.log("✅ Grabbed object:", hit.name || hit.uuid);
+    } else {
+      console.log("🚫 Hit object is not grabbable.");
     }
   }
 }

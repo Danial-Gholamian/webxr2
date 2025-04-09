@@ -16,6 +16,8 @@ const matcapTexture = new THREE.TextureLoader().load(
 );
 
 function createPendulum(position) {
+
+
   const armGeometry = new THREE.CylinderGeometry(0.02, 0.02, length, 32);
   const armMaterial = new THREE.MeshMatcapMaterial({ matcap: matcapTexture });
   const arm = new THREE.Mesh(armGeometry, armMaterial);
@@ -31,7 +33,9 @@ function createPendulum(position) {
   const bob = new THREE.Mesh(bobGeometry, bobMaterial);
 
   bob.userData.defaultMaterial = bobMaterial;
-
+  
+  bob.userData.grabbable = true;
+  arm.userData.grabbable = true;
   arm.position.y = -length / 2;
   bob.position.y = -length;
 
