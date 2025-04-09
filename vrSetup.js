@@ -77,34 +77,35 @@ function tryGrabObject(controller) {
   raycaster.set(origin, direction);
   const intersects = raycaster
     .intersectObjects(scene.children, true)
-    .filter(i => !i.object.userData.isLaser); // filter out laser lines
+    .filter(i => !i.object.userData.isLaser); // filter out laser visuals
 
   console.log("📡 Raycast intersections:", intersects);
 
   if (intersects.length > 0) {
     const hit = intersects[0].object;
-    console.log("🎯 Ray hit object:", hit);
-    console.log("📦 Object type:", hit.type, "| isMesh:", hit.isMesh, "| instanceof Mesh:", hit instanceof THREE.Mesh);
+    const type = hit.userData.type || "unknown";
 
-    // ✅ Only grab if it's a mesh and explicitly marked as grabbable
-    if (hit instanceof THREE.Mesh && hit.userData.grabbable) {
+    console.log(`🎯 Ray hit object of type: ${type}`, hit);
+
+    // Now we only grab objects of type "pendulum" that are marked grabbable
+    if (hit instanceof THREE.Mesh && hit.userData.grabbable && type === "pendulum") {
       grabbedObject = hit;
       grabbingController = controller;
-      console.log("✅ Grabbed object:", hit.name || hit.uuid);
+      console.log("✅ Grabbed pendulum part:", hit.name || hit.uuid);
     } else {
-      console.log("🚫 Hit object is not grabbable.");
+      console.log(`🚫 Cannot grab: type=${type}, grabbable=${!!hit.userData.grabbable}`);
     }
   }
 }
 
-
 function releaseObject() {
   if (grabbedObject) {
-    console.log("🛑 Released object");
+    console.log("🛑 Released object:", grabbedObject.name || grabbedObject.uuid);
     grabbedObject = null;
     grabbingController = null;
   }
 }
+
 
 
 const controllers = { left: null, right: null };
