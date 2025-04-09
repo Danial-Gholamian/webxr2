@@ -87,11 +87,18 @@ function tryGrabObject(controller) {
 
     console.log(`🎯 Ray hit object of type: ${type}`, hit);
 
-    // Now we only grab objects of type "pendulum" that are marked grabbable
     if (hit instanceof THREE.Mesh && hit.userData.grabbable && type === "pendulum") {
-      grabbedObject = hit;
-      grabbingController = controller;
-      console.log("✅ Grabbed pendulum part:", hit.name || hit.uuid);
+      const pivot = hit.parent;
+
+      // Ensure we're grabbing the actual pendulum pivot (parent of mesh)
+      if (pivot && pivot.userData.type === "pendulum") {
+        grabbedObject = pivot;
+        grabbingController = controller;
+        grabbedObject.userData.isBeingHeld = true;
+        console.log("✅ Grabbed pendulum pivot:", grabbedObject.name || grabbedObject.uuid);
+      } else {
+        console.warn("⚠️ Hit object is grabbable but does not have a proper pendulum pivot");
+      }
     } else {
       console.log(`🚫 Cannot grab: type=${type}, grabbable=${!!hit.userData.grabbable}`);
     }
@@ -101,10 +108,12 @@ function tryGrabObject(controller) {
 function releaseObject() {
   if (grabbedObject) {
     console.log("🛑 Released object:", grabbedObject.name || grabbedObject.uuid);
+    grabbedObject.userData.isBeingHeld = false;
     grabbedObject = null;
     grabbingController = null;
   }
 }
+
 
 
 
