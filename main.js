@@ -8,7 +8,9 @@ import {
   controller1,
   controller2,
   grabbedObject,
-  grabbingController 
+  grabbingController,
+  tryGrabObject,
+  releaseObject
 } from './vrSetup.js';
 import { createPendulum, updatePendulums} from './pendulum.js';
 import { movement } from './controls.js';
@@ -27,6 +29,10 @@ for (let i = 0; i < 5; i++) {
 // Now that pendulums are created, create the interactive group
 const interactiveGroup = setupInteractiveGroup(pendulums);
 scene.add(interactiveGroup);
+controller1.addEventListener('selectstart', () => tryGrabObject(controller1, interactiveGroup));
+controller1.addEventListener('selectend', () => releaseObject());
+controller2.addEventListener('selectstart', () => tryGrabObject(controller2, interactiveGroup));
+controller2.addEventListener('selectend', () => releaseObject());
 
 // Keyboard movement handler
 function updateCameraMovement() {
@@ -58,7 +64,7 @@ renderer.setAnimationLoop((time, xrFrame) => {
     const controllerPos = new THREE.Vector3();
     grabbingController.getWorldPosition(controllerPos);
     console.log("🎮 Controller position:", controllerPos);
-    grabbedObject.position.copy(controllerPos);
+    grabbedObject.position.lerp(controllerPos, 0.3); // smooth follow
   }  
   renderer.render(scene, camera);
 });

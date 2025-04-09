@@ -31,10 +31,7 @@ const raycaster = new THREE.Raycaster(); // reuse for grabbing
 // controller2.addEventListener('selectend', releasePendulum);
 
 // What I do is to try for any type of object to see if it works 
-controller1.addEventListener('selectstart', () => tryGrabObject(controller1));
-controller1.addEventListener('selectend', () => releaseObject());
-controller2.addEventListener('selectstart', () => tryGrabObject(controller2));
-controller2.addEventListener('selectend', () => releaseObject());
+
 
 
 
@@ -66,7 +63,7 @@ setupController(controller2);
 
 
 
-function tryGrabObject(controller) {
+function tryGrabObject(controller, group) {
   console.log("🎯 selectstart fired for controller", controller.userData.handedness);
 
   const origin = new THREE.Vector3();
@@ -76,8 +73,8 @@ function tryGrabObject(controller) {
 
   raycaster.set(origin, direction);
   const intersects = raycaster
-    .intersectObjects(scene.children, true)
-    .filter(i => !i.object.userData.isLaser); // filter out laser visuals
+    .intersectObjects(group.children, true)
+    .filter(i => !i.object.userData.isLaser);
 
   console.log("📡 Raycast intersections:", intersects);
 
@@ -89,15 +86,11 @@ function tryGrabObject(controller) {
 
     if (hit instanceof THREE.Mesh && hit.userData.grabbable && type === "pendulum") {
       const pivot = hit.parent;
-
-      // Ensure we're grabbing the actual pendulum pivot (parent of mesh)
       if (pivot && pivot.userData.type === "pendulum") {
         grabbedObject = pivot;
         grabbingController = controller;
         grabbedObject.userData.isBeingHeld = true;
         console.log("✅ Grabbed pendulum pivot:", grabbedObject.name || grabbedObject.uuid);
-      } else {
-        console.warn("⚠️ Hit object is grabbable but does not have a proper pendulum pivot");
       }
     } else {
       console.log(`🚫 Cannot grab: type=${type}, grabbable=${!!hit.userData.grabbable}`);
@@ -105,14 +98,16 @@ function tryGrabObject(controller) {
   }
 }
 
+
 function releaseObject() {
   if (grabbedObject) {
-    console.log("🛑 Released object:", grabbedObject.name || grabbedObject.uuid);
     grabbedObject.userData.isBeingHeld = false;
+    console.log("🛑 Released object:", grabbedObject.name || grabbedObject.uuid);
     grabbedObject = null;
     grabbingController = null;
   }
 }
+
 
 
 
@@ -225,4 +220,4 @@ handleTriggerClick(controller1);
 handleTriggerClick(controller2);
 // UNTIL HERE 
 
-export { handleJoystickInput, updateLaserPointer, controller1, controller2, cameraGroup, grabbedObject, grabbingController};
+export { handleJoystickInput, updateLaserPointer, controller1, controller2, cameraGroup, grabbedObject, grabbingController,tryGrabObject,releaseObject};
