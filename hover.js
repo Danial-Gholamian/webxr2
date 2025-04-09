@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-// import { renderer } from './sceneSetup.js';
 
 const intersected = [];
 const raycaster = new THREE.Raycaster();
@@ -16,13 +15,13 @@ export function detectHover(controller, group) {
 
   const handedness = controller.userData.handedness || "unknown";
 
-  // Clear previous highlights
+  // Clear previous highlights, unless being held
   while (intersected.length) {
     const obj = intersected.pop();
-    if (obj.material?.emissive) {
+    if (!obj.userData.isBeingHeld && obj.material?.emissive) {
       obj.material.emissive.setRGB(0, 0, 0);
+      delete obj.userData.isHovered;
     }
-    console.log(`[Hover:${handedness}] Cleared emissive from`, obj.name || obj.type);
   }
 
   // Ray from controller
@@ -34,51 +33,30 @@ export function detectHover(controller, group) {
   const intersections = raycaster.intersectObjects(group.children, true);
   const line = controller.userData.laser;
 
-  // console.log(`[Hover:${handedness}] Intersections:`, intersections);
-
   if (intersections.length > 0) {
     const hit = intersections[0].object;
-    // console.log(`[Hover:${handedness}] Hit object:`, hit);
+
+    // Skip hover effects if being held
+    if (hit.userData.isBeingHeld) {
+      controller.userData.hoveredObject = null;
+      if (line) line.scale.z = intersections[0].distance;
+      return;
+    }
 
     if (hit instanceof THREE.Mesh) {
-      // console.log(`[Hover:${handedness}] Mesh detected — trying haptics`);
+      hit.userData.isHovered = true;
+      controller.userData.hoveredObject = hit;
+      intersected.push(hit);
 
       const inputSource = controller.userData.inputSource;
-      if (!inputSource) {
-        // console.warn(`[Hover:${handedness}] 🚫 No inputSource`);
-        return;
-      }
-
-      const gamepad = inputSource.gamepad;
-      if (!gamepad) {
-        // console.warn(`[Hover:${handedness}] 🚫 No gamepad`);
-        return;
-      }
-
-      const actuator = gamepad.hapticActuators?.[0];
-      if (!actuator) {
-        // console.warn(`[Hover:${handedness}] 🚫 No haptic actuator`);
-        return;
-      }
-
-      if (typeof actuator.pulse === "function") {
-        // console.log(`[Hover:${handedness}] ✅ actuator.pulse() triggered!`);
-        actuator.pulse(1.0, 100);
-      } else {
-        // console.warn(`[Hover:${handedness}] ❌ pulse not supported`);
-      }
-    } else {
-      console.log("I'm not instamnce of THREE.Mesh !")
+      const actuator = inputSource?.gamepad?.hapticActuators?.[0];
+      if (actuator?.pulse) actuator.pulse(1.0, 100);
     }
 
     if (line) line.scale.z = intersections[0].distance;
   } else {
+    // No intersection
+    controller.userData.hoveredObject = null;
     if (line) line.scale.z = 10;
-
-    if (controller.userData.lastHovered) {
-      console.log(`[Hover:${handedness}] No intersection — clearing lastHovered`);
-    }
-
-    controller.userData.lastHovered = null;
   }
 }

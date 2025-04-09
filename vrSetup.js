@@ -10,7 +10,7 @@ import {pendulums} from './pendulum.js'
 
 
 
-let cameraGroup = new THREE.Group();
+const cameraGroup = new THREE.Group();
 cameraGroup.add(camera);
 scene.add(cameraGroup);
 
@@ -22,7 +22,7 @@ cameraGroup.add(controller2);
 let grabbedObject = null;
 let grabbingController = null;
 
-const raycaster = new THREE.Raycaster(); // reuse for grabbing
+//const raycaster = new THREE.Raycaster(); // reuse for grabbing
 
 
 
@@ -64,37 +64,38 @@ setupController(controller2);
 
 
 
-function tryGrabObject(controller, group) {
-  console.log("🎯 selectstart fired for controller", controller.userData.handedness);
+function tryGrabObject(controller) {
+  const hovered = controller.userData.hoveredObject;
 
-  const tempMatrix = new THREE.Matrix4();
-  tempMatrix.identity().extractRotation(controller.matrixWorld);
-  raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
-  raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
-  
+  if (!hovered) {
+    console.log("🚫 No hovered object to grab.");
+    return;
+  }
 
-  const intersects = raycaster
-    .intersectObjects(group.children, true)
-    .filter(i => !i.object.userData.isLaser && !i.object.name?.includes('button'));
+  if (hovered.userData.isBeingHeld) {
+    console.log("⚠️ Object is already being held.");
+    return;
+  }
 
-  console.log("📡 Raycast intersections:", intersects);
+  // Try to find the matching pendulum based on pivot, arm, or bob
+  const match = pendulums.find(p =>
+    hovered === p.pivot || hovered.parent === p.pivot || hovered.parent?.parent === p.pivot
+  );
 
-  if (intersects.length > 0) {
-    const hit = intersects[0].object;
-    const match = pendulums.find(p => hit === p.pivot || hit.parent === p.pivot || hit.parent?.parent === p.pivot);
+  if (match) {
+    grabbedObject = match.pivot;
+    grabbingController = controller;
 
-    if (match) {
-      grabbedObject = match.pivot;
-      grabbingController = controller;
-      match.pivot.userData.isBeingHeld = true;
-      console.log("✅ Grabbed pendulum pivot:", grabbedObject);
-    } else {
-      console.warn("❓ Hit something that's not mapped in pendulums:", hit.name || hit.uuid);
-    }
+    match.pivot.userData.isBeingHeld = true;
+    hovered.userData.isHovered = false; // Stop hover feedback
+    controller.userData.hoveredObject = null;
+
+    console.log("✅ Grabbed pendulum:", grabbedObject);
   } else {
-    console.log("🚫 No pendulum hit.");
+    console.warn("❓ Hovered object did not match any known pendulum.");
   }
 }
+
 
 
 function releaseObject() {
@@ -104,7 +105,6 @@ function releaseObject() {
     grabbingController = null;
   }
 }
-
 
 
 

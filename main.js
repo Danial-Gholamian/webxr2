@@ -29,9 +29,9 @@ for (let i = 0; i < 5; i++) {
 // Now that pendulums are created, create the interactive group
 const interactiveGroup = setupInteractiveGroup(pendulums);
 scene.add(interactiveGroup);
-controller1.addEventListener('selectstart', () => tryGrabObject(controller1, interactiveGroup));
+controller1.addEventListener('selectstart', () => tryGrabObject(controller1));
 controller1.addEventListener('selectend', () => releaseObject());
-controller2.addEventListener('selectstart', () => tryGrabObject(controller2, interactiveGroup));
+controller2.addEventListener('selectstart', () => tryGrabObject(controller2));
 controller2.addEventListener('selectend', () => releaseObject());
 
 // Keyboard movement handler
