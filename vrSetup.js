@@ -50,6 +50,7 @@ const laserGeometry = new THREE.BufferGeometry().setFromPoints([
 ]);
 const laserMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
 const laser = new THREE.Line(laserGeometry, laserMaterial);
+laser.userData.isLaser = true; // so we can ignore it later
 laser.scale.z = 50;
 
 controller.add(laser);
@@ -74,7 +75,10 @@ function tryGrabObject(controller) {
   controller.getWorldDirection(direction).normalize().multiplyScalar(5);
 
   raycaster.set(origin, direction);
-  const intersects = raycaster.intersectObjects(scene.children, true);
+  const intersects = raycaster
+  .intersectObjects(scene.children, true)
+  .filter(i => !i.object.userData.isLaser); // filter out laser
+
   console.log("📡 Raycast intersections:", intersects);
 
   if (intersects.length > 0) {
