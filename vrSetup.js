@@ -4,7 +4,7 @@ import * as THREE from 'three';
 
 import { scene, camera, renderer } from './sceneSetup.js';
 import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory.js';
-import { grabPendulum, releasePendulum } from './pendulum.js';
+// import { grabPendulum, releasePendulum } from './pendulum.js';
 
 
 
@@ -18,12 +18,23 @@ const controller2 = renderer.xr.getController(1);
 cameraGroup.add(controller1);
 cameraGroup.add(controller2);
 
+let grabbedObject = null;
+let grabbingController = null;
+
+const raycaster = new THREE.Raycaster(); // reuse for grabbing
 
 
-controller1.addEventListener('selectstart', () => grabPendulum(controller1));
-controller1.addEventListener('selectend', releasePendulum);
-controller2.addEventListener('selectstart', () => grabPendulum(controller2));
-controller2.addEventListener('selectend', releasePendulum);
+
+// controller1.addEventListener('selectstart', () => grabPendulum(controller1));
+// controller1.addEventListener('selectend', releasePendulum);
+// controller2.addEventListener('selectstart', () => grabPendulum(controller2));
+// controller2.addEventListener('selectend', releasePendulum);
+
+// What I do is to try for any type of object to see if it works 
+controller1.addEventListener('selectstart', () => tryGrabObject(controller1));
+controller1.addEventListener('selectend', () => releaseObject());
+controller2.addEventListener('selectstart', () => tryGrabObject(controller2));
+controller2.addEventListener('selectend', () => releaseObject());
 
 
 
@@ -46,8 +57,6 @@ controller.userData.laser = laser;
 
 cameraGroup.add(controller);
 
-// controller.addEventListener('selectstart', onSelectStart);
-// controller.addEventListener('selectend', onSelectEnd);
 }
   
 
@@ -55,6 +64,36 @@ cameraGroup.add(controller);
 
 setupController(controller1);
 setupController(controller2);
+
+
+
+function tryGrabObject(controller) {
+  const origin = new THREE.Vector3();
+  const direction = new THREE.Vector3();
+  controller.getWorldPosition(origin);
+  controller.getWorldDirection(direction).normalize().multiplyScalar(5);
+
+  raycaster.set(origin, direction);
+  const intersects = raycaster.intersectObjects(scene.children, true);
+
+  if (intersects.length > 0) {
+    const hit = intersects[0].object;
+    if (hit instanceof THREE.Mesh) {
+      grabbedObject = hit;
+      grabbingController = controller;
+      console.log("✅ Grabbed object:", hit);
+    }
+  }
+}
+
+function releaseObject() {
+  if (grabbedObject) {
+    console.log("🛑 Released object");
+    grabbedObject = null;
+    grabbingController = null;
+  }
+}
+
 
 const controllers = { left: null, right: null };
 
@@ -164,4 +203,4 @@ handleTriggerClick(controller1);
 handleTriggerClick(controller2);
 // UNTIL HERE 
 
-export { handleJoystickInput, updateLaserPointer, controller1, controller2, cameraGroup};
+export { handleJoystickInput, updateLaserPointer, controller1, controller2, cameraGroup, grabbedObject, grabbingController};

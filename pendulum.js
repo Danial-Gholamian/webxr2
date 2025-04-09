@@ -8,8 +8,8 @@ const gravity = 9.81;
 const damping = 0.995;
 
 export const pendulums = [];
-let grabbedPendulum = null;
-let grabbedController = null;
+// let grabbedPendulum = null;
+// let grabbedController = null;
 
 const matcapTexture = new THREE.TextureLoader().load(
   'https://raw.githubusercontent.com/nidorx/matcaps/master/1024/5C4E41_CCCDD6_9B979B_B1AFB0.png'
@@ -51,94 +51,94 @@ function createPendulum(position) {
 
 
 // Raycasting for controller selection
-const raycaster = new THREE.Raycaster();
+// const raycaster = new THREE.Raycaster();
 
-function grabPendulum(controller) {
-  scene.updateMatrixWorld(true);
+// function grabPendulum(controller) {
+//   scene.updateMatrixWorld(true);
 
-  const rayOrigin = new THREE.Vector3();
-  controller.getWorldPosition(rayOrigin);
+//   const rayOrigin = new THREE.Vector3();
+//   controller.getWorldPosition(rayOrigin);
 
-  const rayDirection = new THREE.Vector3();
-  controller.getWorldDirection(rayDirection).normalize().multiplyScalar(5);
+//   const rayDirection = new THREE.Vector3();
+//   controller.getWorldDirection(rayDirection).normalize().multiplyScalar(5);
 
-  raycaster.set(rayOrigin, rayDirection);
-  const intersects = raycaster.intersectObjects(pendulums.map(p => p.pivot), true);
+//   raycaster.set(rayOrigin, rayDirection);
+//   const intersects = raycaster.intersectObjects(pendulums.map(p => p.pivot), true);
 
-  if (intersects.length > 0) {
-    const hit = intersects[0].object;
+//   if (intersects.length > 0) {
+//     const hit = intersects[0].object;
 
-    grabbedPendulum = pendulums.find(p =>
-      hit === p.bob ||
-      hit === p.arm ||
-      hit === p.pivot ||
-      p.pivot.children.includes(hit) ||
-      p.arm.children?.includes(hit) ||
-      p.bob.children?.includes(hit) ||
-      hit.parent === p.pivot ||
-      hit.parent === p.arm ||
-      hit.parent === p.bob
-    );
+//     grabbedPendulum = pendulums.find(p =>
+//       hit === p.bob ||
+//       hit === p.arm ||
+//       hit === p.pivot ||
+//       p.pivot.children.includes(hit) ||
+//       p.arm.children?.includes(hit) ||
+//       p.bob.children?.includes(hit) ||
+//       hit.parent === p.pivot ||
+//       hit.parent === p.arm ||
+//       hit.parent === p.bob
+//     );
 
-    if (grabbedPendulum) {
-      grabbedController = controller;
-      console.log("🎯 Pendulum grabbed!", grabbedPendulum.pivot.position);
-    } else {
-      console.warn("❌ Hit something, but it didn't match a pendulum:", hit);
-    }
-  } else {
-    console.log("🚫 No pendulum detected.");
-  }
-}
+//     if (grabbedPendulum) {
+//       grabbedController = controller;
+//       console.log("🎯 Pendulum grabbed!", grabbedPendulum.pivot.position);
+//     } else {
+//       console.warn("❌ Hit something, but it didn't match a pendulum:", hit);
+//     }
+//   } else {
+//     console.log("🚫 No pendulum detected.");
+//   }
+// }
 
 
 
-function releasePendulum() {
-  if (grabbedPendulum) {
-    grabbedPendulum.velocity = 0;
-    grabbedPendulum.acceleration = 0;
-    grabbedPendulum = null;
-    grabbedController = null;
-  }
-}
+// function releasePendulum() {
+//   if (grabbedPendulum) {
+//     grabbedPendulum.velocity = 0;
+//     grabbedPendulum.acceleration = 0;
+//     grabbedPendulum = null;
+//     grabbedController = null;
+//   }
+// }
 
-function updatePendulums(deltaTime) {
-  pendulums.forEach((p, index) => {
-    if (p === grabbedPendulum && grabbedController) {
-      const controllerPos = new THREE.Vector3();
-      grabbedController.getWorldPosition(controllerPos);
+// function updatePendulums(deltaTime) {
+//   pendulums.forEach((p, index) => {
+//     if (p === grabbedPendulum && grabbedController) {
+//       const controllerPos = new THREE.Vector3();
+//       grabbedController.getWorldPosition(controllerPos);
     
-      // Get the pivot position (fixed point)
-      const pivotPos = p.pivot.position.clone();
+//       // Get the pivot position (fixed point)
+//       const pivotPos = p.pivot.position.clone();
     
-      // Calculate the angle in the XZ-plane
-      const offset = controllerPos.clone().sub(pivotPos);
-      const angle = Math.atan2(offset.x, offset.z); // swing left/right
+//       // Calculate the angle in the XZ-plane
+//       const offset = controllerPos.clone().sub(pivotPos);
+//       const angle = Math.atan2(offset.x, offset.z); // swing left/right
     
-      p.angle = angle;
-      p.velocity = 0; // optional: reset velocity while grabbing
+//       p.angle = angle;
+//       p.velocity = 0; // optional: reset velocity while grabbing
     
-      // Visual update
-      p.pivot.rotation.z = p.angle;
-      return;
-    }    
+//       // Visual update
+//       p.pivot.rotation.z = p.angle;
+//       return;
+//     }    
 
-    p.acceleration = (-gravity / length) * Math.sin(p.angle);
-    p.velocity += p.acceleration * deltaTime;
-    p.velocity *= damping;
-    p.angle += p.velocity * deltaTime;
-    p.pivot.rotation.z = p.angle;
-  });
-}
+//     p.acceleration = (-gravity / length) * Math.sin(p.angle);
+//     p.velocity += p.acceleration * deltaTime;
+//     p.velocity *= damping;
+//     p.angle += p.velocity * deltaTime;
+//     p.pivot.rotation.z = p.angle;
+//   });
+// }
 
-function updateGrabbedPendulum() {
-  if (grabbedPendulum && grabbedController) {
-    const controllerPos = new THREE.Vector3();
-    grabbedController.getWorldPosition(controllerPos);
+// function updateGrabbedPendulum() {
+//   if (grabbedPendulum && grabbedController) {
+//     const controllerPos = new THREE.Vector3();
+//     grabbedController.getWorldPosition(controllerPos);
 
-    grabbedPendulum.pivot.position.copy(controllerPos);
-  }
-}
+//     grabbedPendulum.pivot.position.copy(controllerPos);
+//   }
+// }
 
-
-export { createPendulum, updatePendulums, grabPendulum, releasePendulum, updateGrabbedPendulum};
+// updatePendulums, grabPendulum, releasePendulum, updateGrabbedPendulum
+export { createPendulum};
