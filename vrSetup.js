@@ -67,12 +67,11 @@ setupController(controller2);
 function tryGrabObject(controller, group) {
   console.log("🎯 selectstart fired for controller", controller.userData.handedness);
 
-  const origin = new THREE.Vector3();
-  const direction = new THREE.Vector3();
-  controller.getWorldPosition(origin);
-  controller.getWorldDirection(direction).normalize().multiplyScalar(5);
-
-  raycaster.set(origin, direction);
+  const tempMatrix = new THREE.Matrix4();
+  tempMatrix.identity().extractRotation(controller.matrixWorld);
+  raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
+  raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
+  
 
   const intersects = raycaster
     .intersectObjects(group.children, true)
