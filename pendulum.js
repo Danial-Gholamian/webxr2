@@ -66,19 +66,31 @@ function grabPendulum(controller) {
   const intersects = raycaster.intersectObjects(pendulums.map(p => p.pivot), true);
 
   if (intersects.length > 0) {
-    const hitPivot = intersects[0].object.parent;
-    grabbedPendulum = pendulums.find(p => p.pivot === hitPivot);
+    const hit = intersects[0].object;
+
+    grabbedPendulum = pendulums.find(p =>
+      hit === p.bob ||
+      hit === p.arm ||
+      hit === p.pivot ||
+      p.pivot.children.includes(hit) ||
+      p.arm.children?.includes(hit) ||
+      p.bob.children?.includes(hit) ||
+      hit.parent === p.pivot ||
+      hit.parent === p.arm ||
+      hit.parent === p.bob
+    );
 
     if (grabbedPendulum) {
       grabbedController = controller;
-      console.log("Pendulum grabbed:", grabbedPendulum.pivot.position);
+      console.log("🎯 Pendulum grabbed!", grabbedPendulum.pivot.position);
     } else {
-      console.log("Hit something, but couldn't match it to a pendulum.");
+      console.warn("❌ Hit something, but it didn't match a pendulum:", hit);
     }
   } else {
-    console.log("No pendulum detected.");
+    console.log("🚫 No pendulum detected.");
   }
 }
+
 
 
 function releasePendulum() {
