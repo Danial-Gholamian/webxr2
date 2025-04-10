@@ -209,6 +209,32 @@ renderer.xr.addEventListener("sessionstart", () => {
   });
 });
 
+function teleportFromController(controller) {
+  const tempMatrix = new THREE.Matrix4();
+  const raycaster = new THREE.Raycaster();
+
+  tempMatrix.identity().extractRotation(controller.matrixWorld);
+  raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
+  raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
+  raycaster.far = 100;
+
+  const intersects = raycaster.intersectObjects(scene.children, true).filter(i => !i.object.userData.isLaser);
+
+  if (intersects.length > 0) {
+    const point = intersects[0].point;
+
+    // Optional: clamp to ground level or ignore steep slopes
+    cameraGroup.position.set(point.x, cameraGroup.position.y, point.z);
+
+    console.log(` Teleported to: (${point.x.toFixed(2)}, ${point.z.toFixed(2)})`);
+  } else {
+    console.log(" No valid teleportation target found.");
+  }
+}
+
+// Teleportation
+controller1.addEventListener('squeezestart', () => teleportFromController(controller1));
+controller2.addEventListener('squeezestart', () => teleportFromController(controller2));
 
 
 
