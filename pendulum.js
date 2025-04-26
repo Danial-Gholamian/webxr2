@@ -1,5 +1,8 @@
+// pendulum.js
 import * as THREE from 'three';
 import { scene } from './sceneSetup.js';
+import { detectHover, setupInteractiveGroup } from './hover.js';
+import graphData from './graph-data.js';
 
 // --- Graph State ---
 export const nodes = [];
@@ -9,7 +12,7 @@ const nodeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 const edgeMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
 
 // --- Create a Node ---
-export function createGraphNode(position) {
+function createGraphNode(position) {
   const geometry = new THREE.SphereGeometry(0.2, 16, 16);
   const node = new THREE.Mesh(geometry, nodeMaterial.clone());
   node.position.copy(position);
@@ -20,12 +23,12 @@ export function createGraphNode(position) {
 }
 
 // --- Create a Logical Link ---
-export function createGraphLink(nodeA, nodeB) {
+function createGraphLink(nodeA, nodeB) {
   links.push({ source: nodeA, target: nodeB });
 }
 
 // --- Draw Links (edges) ---
-export function drawGraphLinks() {
+function drawGraphLinks() {
   links.forEach(link => {
     const points = [link.source.position.clone(), link.target.position.clone()];
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
@@ -33,7 +36,6 @@ export function drawGraphLinks() {
     line.userData.type = 'edge';
     scene.add(line);
 
-    // Store the line inside the link if you want to update later
     link.lineObject = line;
   });
 }
@@ -56,3 +58,26 @@ export function updateGraphLinks() {
     link.lineObject.geometry.attributes.position.needsUpdate = true;
   });
 }
+
+// --- Build Graph from Data ---
+const nodeObjects = {}; // map id -> Mesh
+
+graphData.nodes.forEach(data => {
+  const node = createGraphNode(new THREE.Vector3(Math.random()*10-5, Math.random()*5, Math.random()*10-5));
+  node.userData.id = data.id;
+  nodeObjects[data.id] = node;
+});
+
+graphData.links.forEach(link => {
+  const nodeA = nodeObjects[link.source];
+  const nodeB = nodeObjects[link.target];
+  if (nodeA && nodeB) {
+    createGraphLink(nodeA, nodeB);
+  }
+});
+
+drawGraphLinks();
+
+// --- Create interactive group ---
+export const interactiveGroup = setupInteractiveGroup(nodes);
+scene.add(interactiveGroup);

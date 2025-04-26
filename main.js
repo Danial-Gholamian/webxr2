@@ -14,30 +14,14 @@ import {
 } from './vrSetup.js';
 
 import { movement } from './controls.js';
-import { detectHover, setupInteractiveGroup } from './hover.js';
-
-import { createGraphNode, createGraphLink, drawGraphLinks, updateGraphLinks, nodes } from './graph.js'; // << updated import
+import { detectHover } from './hover.js';
+import { interactiveGroup, updateGraphLinks } from './pendulum.js'; // << ONLY import
 
 // Add VR button and enable WebXR
 document.body.appendChild(VRButton.createButton(renderer));
 renderer.xr.enabled = true;
 
-// Create some graph nodes
-const node1 = createGraphNode(new THREE.Vector3(-2, 2, -2));
-const node2 = createGraphNode(new THREE.Vector3(2, 2, -2));
-const node3 = createGraphNode(new THREE.Vector3(0, 0, -2));
-
-createGraphLink(node1, node2);
-createGraphLink(node2, node3);
-createGraphLink(node3, node1);
-
-// Now that nodes are created, draw edges
-drawGraphLinks();
-
-// Create an interactive group for grabbing nodes
-const interactiveGroup = setupInteractiveGroup(nodes);
-scene.add(interactiveGroup);
-
+// Hook grabbing to controller events
 controller1.addEventListener('selectstart', () => tryGrabObject(controller1));
 controller1.addEventListener('selectend', () => releaseObject());
 controller2.addEventListener('selectstart', () => tryGrabObject(controller2));
@@ -63,7 +47,7 @@ renderer.setAnimationLoop((time, xrFrame) => {
   if (controller1.userData.inputSource) detectHover(controller1, interactiveGroup);
   if (controller2.userData.inputSource) detectHover(controller2, interactiveGroup);
 
-  updateGraphLinks(); // <-- update edge positions if nodes move
+  updateGraphLinks(); // keep link positions updated
   updateCameraMovement();
 
   if (grabbedObject && grabbingController) {
