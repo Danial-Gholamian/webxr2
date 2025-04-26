@@ -1,68 +1,58 @@
 import * as THREE from 'three';
 import { scene } from './sceneSetup.js';
 
-const length = 2;
-const gravity = 9.81;
-const damping = 0.995;
+// --- Graph State ---
+export const nodes = [];
+export const links = [];
 
-const matcapTexture = new THREE.TextureLoader().load(
-  'https://raw.githubusercontent.com/nidorx/matcaps/master/1024/5C4E41_CCCDD6_9B979B_B1AFB0.png'
-);
+const nodeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+const edgeMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
 
-export const pendulums = [];
-
-export function createPendulum(position) {
-  const angle = Math.PI / 4;
-  const velocity = 0;
-  const acceleration = 0;
-
-  // Arm
-  const armGeometry = new THREE.CylinderGeometry(0.02, 0.02, length, 32);
-  const armMaterial = new THREE.MeshMatcapMaterial({ matcap: matcapTexture });
-  const arm = new THREE.Mesh(armGeometry, armMaterial);
-  arm.position.y = -length / 2;
-  arm.userData.grabbable = true;
-  arm.userData.type = 'pendulum';
-
-  // Bob
-  const bobGeometry = new THREE.SphereGeometry(0.3, 32, 32);
-  const bobMaterial = new THREE.MeshMatcapMaterial({ matcap: matcapTexture });
-  const bob = new THREE.Mesh(bobGeometry, bobMaterial);
-  bob.position.y = -length;
-  bob.userData.grabbable = true;
-  bob.userData.type = 'pendulum';
-
-  // Pivot
-  const pivot = new THREE.Object3D();
-  pivot.position.copy(position);
-  pivot.add(arm);
-  pivot.add(bob);
-  pivot.userData.type = 'pendulum';
-  pivot.userData.isBeingHeld = false;
-
-  scene.add(pivot);
-
-  const pendulum = {
-    pivot,
-    arm,
-    bob,
-    angle,
-    velocity,
-    acceleration
-  };
-
-  pendulums.push(pendulum);
-  return pendulum;
+// --- Create a Node ---
+export function createGraphNode(position) {
+  const geometry = new THREE.SphereGeometry(0.2, 16, 16);
+  const node = new THREE.Mesh(geometry, nodeMaterial.clone());
+  node.position.copy(position);
+  node.userData.type = 'node';
+  scene.add(node);
+  nodes.push(node);
+  return node;
 }
 
-export function updatePendulums(deltaTime) {
-  pendulums.forEach(p => {
-    if (p.pivot.userData.isBeingHeld) return;
+// --- Create a Logical Link ---
+export function createGraphLink(nodeA, nodeB) {
+  links.push({ source: nodeA, target: nodeB });
+}
 
-    p.acceleration = (-gravity / length) * Math.sin(p.angle);
-    p.velocity += p.acceleration * deltaTime;
-    p.velocity *= damping;
-    p.angle += p.velocity * deltaTime;
-    p.pivot.rotation.z = p.angle;
+// --- Draw Links (edges) ---
+export function drawGraphLinks() {
+  links.forEach(link => {
+    const points = [link.source.position.clone(), link.target.position.clone()];
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    const line = new THREE.Line(geometry, edgeMaterial.clone());
+    line.userData.type = 'edge';
+    scene.add(line);
+
+    // Store the line inside the link if you want to update later
+    link.lineObject = line;
+  });
+}
+
+// --- Update Link Positions if Nodes Move ---
+export function updateGraphLinks() {
+  links.forEach(link => {
+    if (!link.lineObject) return;
+
+    const positions = link.lineObject.geometry.attributes.position.array;
+
+    positions[0] = link.source.position.x;
+    positions[1] = link.source.position.y;
+    positions[2] = link.source.position.z;
+
+    positions[3] = link.target.position.x;
+    positions[4] = link.target.position.y;
+    positions[5] = link.target.position.z;
+
+    link.lineObject.geometry.attributes.position.needsUpdate = true;
   });
 }

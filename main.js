@@ -7,28 +7,37 @@ import {
   updateLaserPointer,
   controller1,
   controller2,
-  grabbedObject,
-  grabbingController,
   tryGrabObject,
-  releaseObject
+  releaseObject,
+  grabbedObject,
+  grabbingController
 } from './vrSetup.js';
-import { createPendulum, updatePendulums} from './pendulum.js';
+
 import { movement } from './controls.js';
 import { detectHover, setupInteractiveGroup } from './hover.js';
-import { pendulums } from './pendulum.js';
+
+import { createGraphNode, createGraphLink, drawGraphLinks, updateGraphLinks, nodes } from './graph.js'; // << updated import
 
 // Add VR button and enable WebXR
 document.body.appendChild(VRButton.createButton(renderer));
 renderer.xr.enabled = true;
 
-// Create pendulums
-for (let i = 0; i < 5; i++) {
-  createPendulum(new THREE.Vector3(i * 1.5 - 3, 2, -2));
-}
+// Create some graph nodes
+const node1 = createGraphNode(new THREE.Vector3(-2, 2, -2));
+const node2 = createGraphNode(new THREE.Vector3(2, 2, -2));
+const node3 = createGraphNode(new THREE.Vector3(0, 0, -2));
 
-// Now that pendulums are created, create the interactive group
-const interactiveGroup = setupInteractiveGroup(pendulums);
+createGraphLink(node1, node2);
+createGraphLink(node2, node3);
+createGraphLink(node3, node1);
+
+// Now that nodes are created, draw edges
+drawGraphLinks();
+
+// Create an interactive group for grabbing nodes
+const interactiveGroup = setupInteractiveGroup(nodes);
 scene.add(interactiveGroup);
+
 controller1.addEventListener('selectstart', () => tryGrabObject(controller1));
 controller1.addEventListener('selectend', () => releaseObject());
 controller2.addEventListener('selectstart', () => tryGrabObject(controller2));
@@ -53,19 +62,15 @@ renderer.setAnimationLoop((time, xrFrame) => {
   updateLaserPointer(controller2);
   if (controller1.userData.inputSource) detectHover(controller1, interactiveGroup);
   if (controller2.userData.inputSource) detectHover(controller2, interactiveGroup);
-  
 
-  updatePendulums(0.016);
+  updateGraphLinks(); // <-- update edge positions if nodes move
   updateCameraMovement();
-  // updateGrabbedPendulum();
 
   if (grabbedObject && grabbingController) {
-    console.log("🧲 Moving grabbed object:", grabbedObject.name || grabbedObject.uuid);
     const controllerPos = new THREE.Vector3();
     grabbingController.getWorldPosition(controllerPos);
-    console.log("🎮 Controller position:", controllerPos);
     grabbedObject.position.lerp(controllerPos, 0.3); // smooth follow
+  }
 
-  }  
   renderer.render(scene, camera);
 });
