@@ -7,6 +7,7 @@ import graphData from './graph-data.js';
 // --- Graph State ---
 export const nodes = [];
 export const links = [];
+export const pendulums = []; // << NEW
 
 const nodeMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 const edgeMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
@@ -18,9 +19,13 @@ function createGraphNode(position) {
   node.position.copy(position);
   node.userData.type = 'node';
   scene.add(node);
+
   nodes.push(node);
+  pendulums.push({ pivot: node }); // << NEW
+
   return node;
 }
+
 
 // --- Create a Logical Link ---
 function createGraphLink(nodeA, nodeB) {
